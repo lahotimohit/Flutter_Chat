@@ -60,6 +60,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           if(value == null || value.trim().isEmpty || !value.contains('@')) {
                             return "Please enter valid email address.";
                           }
+                          return null;
                         },
                         onSaved: (value) {
                           _enteredEmail = value!;
@@ -74,6 +75,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           if(value == null || value.trim().length < 6) {
                             return "Password must be atleast 6 characters long.";
                           }
+                          return null;
                         },
                         onSaved: (value) {
                           _enteredPassword = value!;
