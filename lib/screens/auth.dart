@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final _firebase = FirebaseAuth.instance;
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -16,12 +19,28 @@ class _AuthScreenState extends State<AuthScreen> {
   var _enteredPassword = '';
   
 
-  void _submit() {
+  void _submit() async{
     final isValid = _form.currentState!.validate();
-    if(isValid) {
-      _form.currentState!.save();
-      print(_enteredEmail);
-      print(_enteredPassword);
+    if(!isValid) {
+      return;
+    }
+    _form.currentState!.save();
+    if(_isLogin) {
+      // Login User logic....
+    }
+    else {
+      try {
+      final userCredentials = await _firebase.createUserWithEmailAndPassword(
+        email: _enteredEmail, password: _enteredPassword);
+        print(userCredentials);
+      } 
+      on FirebaseAuthException catch(error) {
+        if(error.code == "email-already-in-use") {
+          //...
+        }
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message ?? "Authentication failed")));
+      }
     }
   }
 
@@ -84,14 +103,14 @@ class _AuthScreenState extends State<AuthScreen> {
                       const SizedBox(height: 30,),
                       ElevatedButton(onPressed: _submit,
                       style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primaryContainer),
-                       child: Text(_isLogin ? "SignUP" : "Login")),
+                       child: Text(_isLogin ? "Login" : "SignUp")),
 
                       TextButton(onPressed: () {
                         setState(() {
                           _isLogin = !_isLogin;
                         });
                       },
-                       child: Text(_isLogin ? "Already have an account. Login" : "Create an account"))
+                       child: Text(_isLogin ? "Create an account" : "Already have an account. Login"))
                     ],
                   ),),
                 ),),
